@@ -5,9 +5,9 @@
     <title>Главная - Интернет-магазин</title>
   </head>
   <body>
+    <a href="{% url 'add_product' %}">Добавить новый товар</a>
     <h1>Каталог товаров</h1>
     <hr />
-<a href="{% url 'add_product' %}">Добавить новый товар</a>
     <div style="display: flex; gap: 20px; flex-wrap: wrap">
       {% for product in products %}
       <div

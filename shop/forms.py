@@ -6,7 +6,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         # Добавьте другие поля модели, если нужно (например, 'description')
-        fields = ['name', 'price', 'description', 'created_at']
+        fields = ['name', 'price', 'description']
 
     def clean_name(self):
         name = self.cleaned_data.get('name')
