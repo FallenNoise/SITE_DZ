@@ -8,23 +8,29 @@
     <a href="{% url 'add_product' %}">Добавить новый товар</a>
     <h1>Каталог товаров</h1>
     <hr />
-    <div style="display: flex; gap: 20px; flex-wrap: wrap">
-      {% for product in products %}
-      <div
+<div style="display: flex; gap: 20px; flex-wrap: wrap">
+    {% for product in products %}
+    <div 
         style="
-          border: 1px solid #ccc;
-          padding: 15px;
-          border-radius: 5px;
-          width: 250px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            width: 250px;
         "
-      >
+    >
         <h3>{{ product.name }}</h3>
         <p>{{ product.description|truncatewords:20 }}</p>
         <p><strong>Цена: {{ product.price }} руб.</strong></p>
-      </div>
-      {% empty %}
-      <p>В магазине пока нет товаров.</p>
-      {% endfor %}
+        
+        <!-- Ссылки добавляем СЮДА, внутри карточки товара -->
+        <br>
+        <a href="{% url 'edit_product' product.id %}">Редактировать</a> | 
+        <a href="{% url 'delete_product' product.id %}" style="color: red;">Удалить</a>
+    </div>
+    {% empty %}
+    <p>В магазине пока нет товаров.</p>
+    {% endfor %}
+</div>
     </div>
   </body>
 </html>
