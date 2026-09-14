@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удаление товара</title>
+</head>
+<body>
+    <h1>Подтверждение удаления</h1>
+    <p>Вы действительно хотите удалить товар "<strong>{{ product.name }}</strong>"? Это действие необратимо.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="color: red;">Да, удалить товар</button>
+    </form>
+    
+    <br>
+    <a href="{% url 'catalog' %}">Отмена</a>
+</body>
+</html>
