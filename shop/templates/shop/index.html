@@ -22,7 +22,7 @@
         <p>{{ product.description|truncatewords:20 }}</p>
         <p><strong>Цена: {{ product.price }} руб.</strong></p>
         
-        <!-- Ссылки добавляем СЮДА, внутри карточки товара -->
+        
         <br>
         <a href="{% url 'edit_product' product.id %}">Редактировать</a> | 
         <a href="{% url 'delete_product' product.id %}" style="color: red;">Удалить</a>
