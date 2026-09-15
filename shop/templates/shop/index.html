@@ -3,6 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <title>Главная - Интернет-магазин</title>
+    <style>
+        .product-title-link {
+            color: #0066cc; 
+            text-decoration: none; 
+            transition: color 0.2s ease-in-out; 
+        }
+        .product-title-link:hover {
+            color: #003366; 
+        }
+    </style>
   </head>
   <body>
     
@@ -19,12 +29,17 @@
             width: 250px;
         "
     >
-        <h3>{{ product.name }}</h3>
+        <h3>
+            <a href="{% url 'product_detail' product.id %}" class="product-title-link">
+        {{ product.name }}
+            </a>
+        </h3>
         <p>{{ product.description|truncatewords:20 }}</p>
         <p><strong>Цена: {{ product.price }} руб.</strong></p>
         
         
         <br>
+        <a href="{% url 'product_detail' product.id %}">Подробнее</a>
         <a href="{% url 'edit_product' product.id %}">Редактировать</a> | 
         <a href="{% url 'delete_product' product.id %}" style="color: red;">Удалить</a>
     </div>
