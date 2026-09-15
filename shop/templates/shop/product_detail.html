@@ -1,0 +1,23 @@
+<!-- Наследуем базовый шаблон вашего сайта, если он есть -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="product-detail">
+    <h1>{{ product.name }}</h1>
+    
+    <p class="price">
+        <strong>Цена:</strong> {{ product.price }} руб.
+    </p>
+    
+    <div class="description">
+        <h3>Описание:</h3>
+        <!-- Фильтр linebreaks сохраняет переносы строк из админки -->
+        <p>{{ product.description|linebreaks }}</p>
+    </div>
+    
+    <button class="add-to-cart-btn">Добавить в корзину</button>
+    
+    <br><br>
+    <a href="/">← Вернуться к списку товаров</a>
+</div>
+{% endblock %}

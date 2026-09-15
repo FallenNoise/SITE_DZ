@@ -2,6 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product
 from .forms import ProductForm
 
+def product_detail(request, id):
+    # Ищем товар по ID. Если не найден — отдаем 404
+    product = get_object_or_404(Product, id=id)
+    
+    # Передаем объект товара в шаблон
+    return render(request, 'shop/product_detail.html', {'product': product})
+
 
 def product_list(request):
     products = Product.objects.all().order_by('-created_at')
