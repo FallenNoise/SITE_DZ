@@ -1,21 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Редактирование товара</title>
-</head>
-<body>
-    <a href="{% url 'index' %}">На главную</a>
-    <h1>Редактировать товар: {{ product.name }}</h1>
-    
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить изменения</button>
-    </form>
-    
-    <br>
-    
-    <a href="{% url 'index' %}">Отмена и возврат в каталог</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white text-center">
+                <h4 class="mb-0">Редактирование товара</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
+                        <a href="/" class="btn btn-outline-secondary">← Отмена</a>
+                        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
