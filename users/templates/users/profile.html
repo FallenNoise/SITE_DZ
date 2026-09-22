@@ -3,7 +3,18 @@
 {% block content %}
   <h2>Профиль пользователя: {{ user.username }}</h2>
   <p>Дата регистрации: {{ user.date_joined|date:"d M Y" }}</p>
-  
+  <hr>
+  <h3>Мои товары:</h3>
+  <ul>
+      {% for product in user.product_set.all %}
+          <li>
+              <a href="{{ product.get_absolute_url }}">{{ product.name }}</a> - {{ product.price }} руб.
+          </li>
+      {% empty %}
+          <p>У вас пока нет добавленных товаров.</p>
+      {% endfor %}
+  </ul>
+  <br>
   <form action="{% url 'logout' %}" method="POST">
       {% csrf_token %}
       <button type="submit">Выйти из аккаунта</button>
