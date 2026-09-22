@@ -15,7 +15,24 @@
     </style>
   </head>
   <body>
-    
+    <div style="text-align: right; padding: 10px; background-color: #f8f9fa; margin-bottom: 20px;">
+    <!-- Проверяем, авторизован ли текущий посетитель -->
+    {% if user.is_authenticated %}
+        <span>Привет, <strong>{{ user.username }}</strong>!</span> |
+        <a href="{% url 'profile' %}">Мой профиль</a> | 
+        
+        <!-- В новых версиях Django выход (logout) обязательно делается через POST-запрос формы в целях безопасности -->
+        <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" style="border: none; background: none; color: #0066cc; text-decoration: underline; cursor: pointer; padding: 0;">Выйти</button>
+        </form>
+        
+    {% else %}
+        <!-- Если это гость, показываем ссылки на вход и регистрацию -->
+        <a href="{% url 'login' %}">Войти</a> | 
+        <a href="{% url 'register' %}">Регистрация</a>
+    {% endif %}
+</div>    
     <a href="{% url 'add_product' %}">Добавить новый товар</a>
     <h1>Каталог товаров</h1>
     <hr />
@@ -40,8 +57,10 @@
         
         <br>
         <a href="{% url 'product_detail' product.id %}">Подробнее</a>
-        <a href="{% url 'edit_product' product.id %}">Редактировать</a> | 
-        <a href="{% url 'delete_product' product.id %}" style="color: red;">Удалить</a>
+        {% if product.owner == user %}
+    | <a href="{% url 'edit_product' product.id %}">Редактировать</a> | 
+    <a href="{% url 'delete_product' product.id %}" style="color: red;">Удалить</a>
+{% endif %}
     </div>
     {% empty %}
     <p>В магазине пока нет товаров.</p>
