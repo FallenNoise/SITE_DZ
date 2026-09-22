@@ -1,23 +1,28 @@
-<!-- Наследуем базовый шаблон вашего сайта, если он есть -->
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="product-detail">
-    <h1>{{ product.name }}</h1>
-    
-    <p class="price">
-        <strong>Цена:</strong> {{ product.price }} руб.
-    </p>
-    
-    <div class="description">
-        <h3>Описание:</h3>
-        <!-- Фильтр linebreaks сохраняет переносы строк из админки -->
-        <p>{{ product.description|linebreaks }}</p>
+<div class="row mt-5 justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <!-- Название и цена -->
+                <h1 class="card-title text-primary mb-3">{{ product.name }}</h1>
+                <h4 class="text-dark fw-bold mb-4">Цена: {{ product.price }} руб.</h4>
+                
+                <!-- Описание товара -->
+                <div class="mb-5">
+                    <h5 class="text-muted border-bottom pb-2">Описание:</h5>
+                    <!-- Используем фильтр linebreaks, чтобы сохранить абзацы -->
+                    <p class="card-text mt-3 fs-5">{{ product.description|linebreaks }}</p>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-success btn-lg">Добавить в корзину</button>
+                    <a href="/" class="btn btn-outline-secondary">← Вернуться к списку товаров</a>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <button class="add-to-cart-btn">Добавить в корзину</button>
-    
-    <br><br>
-    <a href="/">← Вернуться к списку товаров</a>
 </div>
 {% endblock %}
