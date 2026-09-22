@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Профиль пользователя: {{ user.username }}</h2>
+  <p>Дата регистрации: {{ user.date_joined|date:"d M Y" }}</p>
+  
+  <form action="{% url 'logout' %}" method="POST">
+      {% csrf_token %}
+      <button type="submit">Выйти из аккаунта</button>
+  </form>
+{% endblock %}

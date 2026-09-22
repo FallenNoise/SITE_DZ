@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shop',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,12 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Куда перенаправлять пользователя после успешного входа (по имени маршрута)
+LOGIN_REDIRECT_URL = 'profile'
+
+# Куда перенаправлять после выхода (на главную)
+LOGOUT_REDIRECT_URL = '/'
+
+# URL-адрес страницы входа (чтобы Django знал, куда отправлять неавторизованных)
+LOGIN_URL = 'login'
