@@ -21,17 +21,13 @@ def product_list(request):
 @login_required
 def add_product(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        # request.FILES нужен для получения картинки из формы
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            # Создаем объект товара, но приостанавливаем сохранение в БД
             product = form.save(commit=False)
-
-            # Присваиваем текущего авторизованного пользователя
             product.owner = request.user
-
-            # Теперь окончательно сохраняем товар в базу данных
+            product.status = 'pending'
             product.save()
-
             return redirect('index')
     else:
         form = ProductForm()
@@ -53,7 +49,7 @@ def edit_product(request, product_id):
 
     if request.method == 'POST':
         # Передаем instance=product, чтобы форма знала, какой товар обновлять
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             # Здесь commit=False не нужен, так как владелец уже привязан к товару
             form.save()
@@ -64,6 +60,7 @@ def edit_product(request, product_id):
 
     # Используем тот же шаблон, что и для добавления (или 'shop/edit_product.html', если он у вас отдельный)
     return render(request, 'shop/add_product.html', {'form': form})
+
 
 def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
