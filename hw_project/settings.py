@@ -136,3 +136,6 @@ LOGOUT_REDIRECT_URL = '/'
 
 # URL-адрес страницы входа (чтобы Django знал, куда отправлять неавторизованных)
 LOGIN_URL = 'login'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
