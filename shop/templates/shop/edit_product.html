@@ -8,7 +8,7 @@
                 <h4 class="mb-0">Редактирование товара</h4>
             </div>
             <div class="card-body p-4">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
