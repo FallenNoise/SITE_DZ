@@ -5,7 +5,11 @@
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-body p-5">
-                
+                {% if product.image %}
+                    <div class="text-center mb-4">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: contain;">
+                    </div>
+                {% endif %}
                 <h1 class="card-title text-primary mb-3">{{ product.name }}</h1>
                 <h4 class="text-dark fw-bold mb-4">Цена: {{ product.price }} руб.</h4>
                 
