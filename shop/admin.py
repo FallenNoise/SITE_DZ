@@ -1,14 +1,26 @@
 from django.contrib import admin
-from .models import Product
+from .models import Product, Category, Manufacturer
+
+# Регистрируем Категории
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+# Регистрируем Производителей
+
+
+@admin.register(Manufacturer)
+class ManufacturerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'country', 'website')
+
+# Обновляем Товары (ваши настройки сохранены, добавлены новые поля)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    # Какие столбцы показывать в списке товаров
-    list_display = ('name', 'price', 'owner', 'status', 'created_at')
-
-    # По каким полям можно фильтровать товары сбоку
-    list_filter = ('status', 'created_at')
-
-    # Делает поле статуса редактируемым прямо в общем списке!
+    list_display = ('name', 'price', 'category', 'manufacturer',
+                    'owner', 'status', 'created_at')
+    list_filter = ('status', 'category', 'manufacturer', 'created_at')
     list_editable = ('status',)
