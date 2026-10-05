@@ -1,12 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* Анимация для оранжевой кнопки */
+    .btn-orange-animated {
+        color: #cc5200;
+        border: 1px solid #cc5200;
+        background-color: #fff;
+        transition: all 0.2s ease-in-out; /* Плавность всех изменений */
+    }
+    
+    /* Состояние при наведении курсора */
+    .btn-orange-animated:hover {
+        background-color: #cc5200;
+        color: #ffffff;
+        transform: translateY(-2px); /* Легкое поднятие кнопки вверх */
+        box-shadow: 0 4px 10px rgba(204, 82, 0, 0.3) !important; /* Появление оранжевой тени */
+    }
+    
+    /* Состояние при клике (удержании мыши) */
+    .btn-orange-animated:active {
+        transform: translateY(1px) scale(0.96); /* Эффект продавливания внутрь */
+        box-shadow: 0 2px 5px rgba(204, 82, 0, 0.2) !important;
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4 pb-2" style="border-bottom: 3px solid #ff8c1a;">
     <h2 class="fw-bolder mb-0" style="color: #cc5200; letter-spacing: 0.5px;">
         Каталог товаров
     </h2>
     {% if user.is_authenticated %}
-        <a href="{% url 'add_product' %}" class="btn btn-sm px-3 rounded-pill shadow-sm" style="color: #cc5200; border: 1px solid #cc5200; background-color: #fff;">
+        <!-- Убрали style="..." и добавили класс btn-orange-animated -->
+        <a href="{% url 'add_product' %}" class="btn btn-sm px-3 rounded-pill shadow-sm btn-orange-animated">
             + Добавить товар
         </a>
     {% endif %}
