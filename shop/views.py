@@ -1,73 +1,37 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product
-from .forms import ProductForm
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView, DetailView
+from .models import Product, Tag
 
 
-def product_detail(request, id):
-    # Ищем товар по ID. Если не найден — отдаем 404
-    product = get_object_or_404(Product, id=id)
+class ProductListView(ListView):
+    model = Product
+    template_name = 'shop/index.html'
+    context_object_name = 'products'
 
-    # Передаем объект товара в шаблон
-    return render(request, 'shop/product_detail.html', {'product': product})
+    def get_queryset(self):
+        # Показываем только товары со статусом "Опубликовано", сортируем по новизне
+        queryset = Product.objects.filter(
+            status='published').order_by('-created_at')
 
+        # Если в URL передан тег, дополнительно фильтруем по нему
+        tag_slug = self.kwargs.get('tag_slug')
+        if tag_slug:
+            self.tag = get_object_or_404(Tag, slug=tag_slug)
+            queryset = queryset.filter(tags=self.tag)
+        else:
+            self.tag = None
 
-def product_list(request):
-    products = Product.objects.all().order_by('-created_at')
-    return render(request, 'shop/index.html', {'products': products})
+        return queryset
 
-
-@login_required
-def add_product(request):
-    if request.method == 'POST':
-        # request.FILES нужен для получения картинки из формы
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.owner = request.user
-            product.status = 'pending'
-            product.save()
-            return redirect('index')
-    else:
-        form = ProductForm()
-
-    return render(request, 'shop/add_product.html', {'form': form})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_tag'] = self.tag
+        # Передаем все теги для кнопок-фильтров
+        context['all_tags'] = Tag.objects.all()
+        return context
 
 
-@login_required
-def edit_product(request, product_id):
-    # Ищем товар в базе данных
-    product = get_object_or_404(Product, id=product_id)
-
-    # ПРОВЕРКА ПРАВ: Если владелец товара не совпадает с текущим пользователем
-    # null (None) проверка нужна на случай, если у старых товаров вообще нет владельца
-    if product.owner != request.user:
-        raise PermissionDenied("Вы не можете редактировать чужой товар.")
-        # Альтернативно, вместо ошибки можно просто вернуть на главную:
-        # return redirect('index')
-
-    if request.method == 'POST':
-        # Передаем instance=product, чтобы форма знала, какой товар обновлять
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            # Здесь commit=False не нужен, так как владелец уже привязан к товару
-            form.save()
-            # Укажите здесь имя вашего URL для возврата
-            return redirect('index')
-    else:
-        form = ProductForm(instance=product)
-
-    # Используем тот же шаблон, что и для добавления (или 'shop/edit_product.html', если он у вас отдельный)
-    return render(request, 'shop/add_product.html', {'form': form})
-
-
-def delete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-
-    if request.method == 'POST':
-        product.delete()
-
-        return redirect('index')
-
-    return render(request, 'shop/confirm_delete.html', {'product': product})
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'shop/product_detail.html'
+    context_object_name = 'product'
