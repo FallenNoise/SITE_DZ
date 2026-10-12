@@ -2,6 +2,26 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+# --- НОВАЯ МОДЕЛЬ: Теги ---
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True,
+                            verbose_name="Имя тега")
+    slug = models.SlugField(max_length=50, unique=True,
+                            verbose_name="URL-метка")
+
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('product_list_by_tag', args=[self.slug])
+
 # 1. Модель Категории
 
 
@@ -45,12 +65,14 @@ class Product(models.Model):
 
     name = models.CharField(max_length=200, verbose_name="Название")
 
-    # НОВЫЕ ПОЛЯ: Связи с Категорией и Производителем
-    # on_delete=models.SET_NULL значит, что если удалить производителя, товар останется, а поле станет пустым
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Категория")
     manufacturer = models.ForeignKey(
         Manufacturer, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Производитель")
+
+    # --- НОВОЕ ПОЛЕ: Связь с тегами ---
+    tags = models.ManyToManyField(
+        Tag, related_name='products', blank=True, verbose_name="Теги")
 
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(
