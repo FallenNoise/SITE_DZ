@@ -1,43 +1,83 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | Магазин Оранжевого настроения{% endblock %}
 
 {% block content %}
-<div class="row mt-5 justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-body p-5">
-                {% if product.image %}
-                    <div class="text-center mb-4">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: contain;">
-                    </div>
-                {% endif %}
-                <h1 class="card-title text-primary mb-3">{{ product.name }}</h1>
-                <h4 class="text-dark fw-bold mb-4">Цена: {{ product.price }} руб.</h4>
+<div class="mt-4 mb-3">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left"></i> Назад в каталог
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 mb-5">
+    <div class="row g-0">
+        <!-- Фото -->
+        <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-3">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 500px; object-fit: contain;">
+            {% else %}
+                <i class="bi bi-image text-secondary" style="font-size: 8rem;"></i>
+            {% endif %}
+        </div>
+        
+        <!-- Информация -->
+        <div class="col-md-7">
+            <div class="card-body p-4 p-md-5">
                 
-                <!-- НОВЫЙ БЛОК: Вывод категории и производителя -->
-                <div class="mb-4 p-3 bg-light rounded border">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge {% if product.status == 'published' %}bg-success{% elif product.status == 'pending' %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
+                        {{ product.get_status_display }}
+                    </span>
+                    <!-- Вывод просмотров -->
+                    <span class="text-muted" title="Количество уникальных просмотров">
+                        <i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}
+                    </span>
+                </div>
+
+                <h1 class="card-title fw-bold mb-3 text-primary">{{ product.name }}</h1>
+                <h3 class="fw-bold mb-4" style="color: #cc5200;">{{ product.price }} руб.</h3>
+
+                <div class="mb-4">
                     {% if product.category %}
-                        <p class="mb-2"><strong>Категория:</strong> {{ product.category.name }}</p>
+                        <p class="mb-1"><strong>Категория:</strong> <span class="text-muted">{{ product.category.name }}</span></p>
                     {% endif %}
-                    
                     {% if product.manufacturer %}
-                        <p class="mb-0">
-                            <strong>Производитель:</strong> 
-                            {{ product.manufacturer.name }} 
-                            <span class="text-muted">({{ product.manufacturer.country }})</span>
-                        </p>
+                        <p class="mb-1"><strong>Производитель:</strong> <span class="text-muted">{{ product.manufacturer.name }} ({{ product.manufacturer.country }})</span></p>
                     {% endif %}
+                    <p class="mb-1"><strong>Продавец:</strong> <span class="text-muted">{% if product.owner %}{{ product.owner.username }}{% else %}Магазин{% endif %}</span></p>
+                    <p class="mb-1"><strong>Добавлено:</strong> <span class="text-muted">{{ product.created_at|date:"d M Y" }}</span></p>
                 </div>
-                
-                <div class="mb-5">
-                    <h5 class="text-muted border-bottom pb-2">Описание:</h5>
-                    <p class="card-text mt-3 fs-5">{{ product.description|linebreaks }}</p>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-secondary border-bottom pb-2">Описание</h5>
+                    <p class="card-text text-muted" style="line-height: 1.6;">{{ product.description|linebreaksbr }}</p>
                 </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <button class="btn btn-success btn-lg">Добавить в корзину</button>
-                    <a href="/" class="btn btn-outline-secondary">← Вернуться к списку</a>
+
+                {% if product.tags.all %}
+                <div class="mb-4">
+                    <p class="mb-2 fw-bold text-secondary">Метки:</p>
+                    {% for tag in product.tags.all %}
+                        <a href="{{ tag.get_absolute_url }}" class="badge bg-light text-secondary border border-warning text-decoration-none me-1 p-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                            #{{ tag.name }}
+                        </a>
+                    {% endfor %}
                 </div>
-                
+                {% endif %}
+
+                <!-- Панель управления только для создателя товара -->
+                {% if user.is_authenticated and user == product.owner %}
+                <div class="mt-5 p-3 bg-light rounded border border-warning d-flex gap-2">
+                    <span class="fw-bold me-auto align-self-center text-muted">Управление вашим товаром:</span>
+                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                        <i class="bi bi-pencil-square"></i> Редактировать
+                    </a>
+                    <a href="{% url 'delete_product' product.pk %}" class="btn btn-danger btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                        <i class="bi bi-trash"></i> Удалить
+                    </a>
+                </div>
+                {% endif %}
+
             </div>
         </div>
     </div>
