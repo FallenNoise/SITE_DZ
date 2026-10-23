@@ -12,24 +12,24 @@
 
 <div class="card shadow-sm border-0 mb-5">
     <div class="row g-0">
-        <!-- Фото -->
-        <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-3">
+        <!-- ФОТОГРАФИЯ (Увеличена до 6 колонок) -->
+        <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4">
             {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 500px; object-fit: contain;">
+                <!-- object-fit: contain не дает картинке обрезаться, даже если она огромная -->
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 650px; width: 100%; object-fit: contain;">
             {% else %}
-                <i class="bi bi-image text-secondary" style="font-size: 8rem;"></i>
+                <i class="bi bi-image text-secondary" style="font-size: 10rem;"></i>
             {% endif %}
         </div>
         
-        <!-- Информация -->
-        <div class="col-md-7">
+        <!-- ИНФОРМАЦИЯ (Занимает оставшиеся 6 колонок) -->
+        <div class="col-md-6">
             <div class="card-body p-4 p-md-5">
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="badge {% if product.status == 'published' %}bg-success{% elif product.status == 'pending' %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
                         {{ product.get_status_display }}
                     </span>
-                    <!-- Вывод просмотров -->
                     <span class="text-muted" title="Количество уникальных просмотров">
                         <i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}
                     </span>
@@ -65,10 +65,9 @@
                 </div>
                 {% endif %}
 
-                <!-- Панель управления только для создателя товара -->
                 {% if user.is_authenticated and user == product.owner %}
-                <div class="mt-5 p-3 bg-light rounded border border-warning d-flex gap-2">
-                    <span class="fw-bold me-auto align-self-center text-muted">Управление вашим товаром:</span>
+                <div class="mt-5 p-3 bg-light rounded border border-warning d-flex flex-wrap gap-2">
+                    <span class="fw-bold w-100 mb-2 text-muted">Управление вашим товаром:</span>
                     <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                         <i class="bi bi-pencil-square"></i> Редактировать
                     </a>
