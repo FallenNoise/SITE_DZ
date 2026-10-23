@@ -2,8 +2,6 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 
-# --- НОВАЯ МОДЕЛЬ: Теги ---
-
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True,
@@ -22,8 +20,6 @@ class Tag(models.Model):
     def get_absolute_url(self):
         return reverse('product_list_by_tag', args=[self.slug])
 
-# 1. Модель Категории
-
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название")
@@ -36,8 +32,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
-
-# 2. Модель Производителя
 
 
 class Manufacturer(models.Model):
@@ -53,8 +47,6 @@ class Manufacturer(models.Model):
         verbose_name = "Производитель"
         verbose_name_plural = "Производители"
 
-# 3. Обновленная модель Товара
-
 
 class Product(models.Model):
     STATUS_CHOICES = [
@@ -64,15 +56,16 @@ class Product(models.Model):
     ]
 
     name = models.CharField(max_length=200, verbose_name="Название")
-
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Категория")
     manufacturer = models.ForeignKey(
         Manufacturer, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Производитель")
-
-    # --- НОВОЕ ПОЛЕ: Связь с тегами ---
     tags = models.ManyToManyField(
         Tag, related_name='products', blank=True, verbose_name="Теги")
+
+    # НОВОЕ ПОЛЕ: Связь с пользователями для учета просмотров
+    viewed_by_users = models.ManyToManyField(
+        User, related_name='viewed_products', blank=True, verbose_name="Просмотрели пользователи")
 
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(

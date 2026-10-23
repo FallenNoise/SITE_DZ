@@ -1,14 +1,17 @@
 from django.urls import path
-from .views import ProductListView, ProductDetailView
+from .views import (
+    ProductListView, ProductDetailView,
+    ProductCreateView, ProductUpdateView, ProductDeleteView
+)
 
 urlpatterns = [
-    # Главная страница (каталог)
     path('', ProductListView.as_view(), name='index'),
-
-    # Каталог, отфильтрованный по тегу
     path('tag/<slug:tag_slug>/', ProductListView.as_view(),
          name='product_list_by_tag'),
 
-    # Карточка товара (у вас используется id, поэтому <int:pk>)
+    path('product/add/', ProductCreateView.as_view(), name='add_product'),
     path('product/<int:pk>/', ProductDetailView.as_view(), name='product_detail'),
+    path('product/<int:pk>/edit/', ProductUpdateView.as_view(), name='edit_product'),
+    path('product/<int:pk>/delete/',
+         ProductDeleteView.as_view(), name='delete_product'),
 ]
