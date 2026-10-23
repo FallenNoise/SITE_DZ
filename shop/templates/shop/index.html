@@ -37,20 +37,31 @@
     {% for product in products %}
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
-                {% else %}
-                    <div class="card-img-top bg-light d-flex justify-content-center align-items-center text-muted" style="height: 250px;">
-                        <i class="bi bi-image text-secondary fs-1"></i>
-                    </div>
-                {% endif %}
+                
+                <!-- КЛИКАБЕЛЬНОЕ ИЗОБРАЖЕНИЕ С HTMX -->
+                <a href="{{ product.get_absolute_url }}" class="text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex justify-content-center align-items-center text-muted" style="height: 250px;">
+                            <i class="bi bi-image text-secondary fs-1"></i>
+                        </div>
+                    {% endif %}
+                </a>
                 
                 <div class="card-body d-flex flex-column">
                     <div>
                         {% if product.category %}
                             <span class="badge bg-info mb-2">{{ product.category.name }}</span>
                         {% endif %}
-                        <h5 class="card-title text-primary">{{ product.name }}</h5>
+                        
+                        <!-- КЛИКАБЕЛЬНЫЙ ЗАГОЛОВОК С HTMX -->
+                        <h5 class="card-title">
+                            <a href="{{ product.get_absolute_url }}" class="text-primary text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                                {{ product.name }}
+                            </a>
+                        </h5>
+                        
                         <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
                         
                         <div class="mb-3">
@@ -69,7 +80,6 @@
                             <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                                 Подробнее
                             </a>
-                            <!-- Счетчик просмотров -->
                             <span class="text-muted small" title="Просмотры пользователей">
                                 <i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}
                             </span>
