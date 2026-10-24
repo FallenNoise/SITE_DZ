@@ -3,41 +3,48 @@
 
 {% block title %}{{ product.name }} | Магазин Оранжевого настроения{% endblock %}
 
-<!-- ДОБАВЛЕН БЛОК СТИЛЕЙ ДЛЯ АНИМАЦИИ КАРТИНКИ И ЗАТЕМНЕНИЯ ФОНА -->
 {% block extra_head %}
 <style>
     /* Эффекты при наведении на главную картинку товара */
     .detail-img-zoom {
-        cursor: zoom-in; /* Курсор превращается в лупу с плюсом */
+        cursor: zoom-in;
         transition: transform 0.3s ease-in-out, filter 0.3s ease;
     }
     .detail-img-zoom:hover {
-        transform: scale(1.03); /* Легкое приближение, показывающее кликабельность */
-        filter: brightness(1.04); /* Легкое осветление картинки */
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Мягкая тень */
+        transform: scale(1.03);
+        filter: brightness(1.04);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
     
-    /* Делаем фон модального окна чуть темнее для красивого контраста */
     .modal-backdrop.show {
         opacity: 0.85 !important;
+    }
+
+    /* Анимация для плавающей кнопки "Назад" */
+    .floating-back-btn {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        z-index: 1050; /* Поверх всех элементов карточки */
+    }
+    .floating-back-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="mt-4 mb-3">
-    <!-- ИСПРАВЛЕННАЯ КНОПКА НАЗАД: Теперь это button, она не перезагружает страницу, музыка не прерывается -->
-    <button type="button" onclick="window.history.back();" class="btn btn-outline-secondary btn-sm mb-3">
-        <i class="bi bi-arrow-left"></i> Назад в каталог
-    </button>
-</div>
+<!-- ПЛАВАЮЩАЯ КНОПКА "В КАТАЛОГ" (Зафиксирована в левом нижнем углу экрана) -->
+<a href="{% url 'index' %}" 
+   class="btn btn-dark btn-lg rounded-pill shadow floating-back-btn position-fixed bottom-0 start-0 m-4 d-flex align-items-center" 
+   hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+    <i class="bi bi-arrow-left me-2 fs-5"></i> <span class="fw-bold">В каталог</span>
+</a>
 
-<div class="card shadow-sm border-0 mb-5">
+<div class="card shadow-sm border-0 mb-5 mt-4">
     <div class="row g-0">
         <!-- ФОТОГРАФИЯ ТОВАРА -->
         <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4 overflow-hidden">
             {% if product.image %}
-                <!-- ДОБАВЛЕН КЛАСС detail-img-zoom И АТРИБУТЫ ВЫЗОВА МОДАЛЬНОГО ОКНА Bootstrap -->
                 <img src="{{ product.image.url }}" class="img-fluid rounded detail-img-zoom" alt="{{ product.name }}" 
                      style="max-height: 650px; width: 100%; object-fit: contain;" 
                      data-bs-toggle="modal" data-bs-target="#imageZoomModal">
@@ -106,16 +113,14 @@
     </div>
 </div>
 
-<!-- НОВЫЙ БЛОК: МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ОРИГИНАЛА ИЗОБРАЖЕНИЯ -->
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ОРИГИНАЛА ИЗОБРАЖЕНИЯ -->
 {% if product.image %}
 <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
-            <!-- Шапка модалки с крестиком закрытия (data-bs-theme="dark" делает крестик белым на темном фоне) -->
             <div class="modal-header border-0 pb-0" data-bs-theme="dark">
                 <button type="button" class="btn-close fs-4 shadow-none" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <!-- Тело модалки с большой картинкой -->
             <div class="modal-body text-center pt-0">
                 <img src="{{ product.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ product.name }}" style="max-height: 85vh; object-fit: contain;">
             </div>
