@@ -3,26 +3,50 @@
 
 {% block title %}{{ product.name }} | Магазин Оранжевого настроения{% endblock %}
 
+<!-- ДОБАВЛЕН БЛОК СТИЛЕЙ ДЛЯ АНИМАЦИИ КАРТИНКИ И ЗАТЕМНЕНИЯ ФОНА -->
+{% block extra_head %}
+<style>
+    /* Эффекты при наведении на главную картинку товара */
+    .detail-img-zoom {
+        cursor: zoom-in; /* Курсор превращается в лупу с плюсом */
+        transition: transform 0.3s ease-in-out, filter 0.3s ease;
+    }
+    .detail-img-zoom:hover {
+        transform: scale(1.03); /* Легкое приближение, показывающее кликабельность */
+        filter: brightness(1.04); /* Легкое осветление картинки */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15); /* Мягкая тень */
+    }
+    
+    /* Делаем фон модального окна чуть темнее для красивого контраста */
+    .modal-backdrop.show {
+        opacity: 0.85 !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="mt-4 mb-3">
-    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
+    <!-- ИСПРАВЛЕННАЯ КНОПКА НАЗАД: Теперь это button, она не перезагружает страницу, музыка не прерывается -->
+    <button type="button" onclick="window.history.back();" class="btn btn-outline-secondary btn-sm mb-3">
         <i class="bi bi-arrow-left"></i> Назад в каталог
-    </a>
+    </button>
 </div>
 
 <div class="card shadow-sm border-0 mb-5">
     <div class="row g-0">
-        <!-- ФОТОГРАФИЯ (Увеличена до 6 колонок) -->
-        <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4">
+        <!-- ФОТОГРАФИЯ ТОВАРА -->
+        <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4 overflow-hidden">
             {% if product.image %}
-                <!-- object-fit: contain не дает картинке обрезаться, даже если она огромная -->
-                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 650px; width: 100%; object-fit: contain;">
+                <!-- ДОБАВЛЕН КЛАСС detail-img-zoom И АТРИБУТЫ ВЫЗОВА МОДАЛЬНОГО ОКНА Bootstrap -->
+                <img src="{{ product.image.url }}" class="img-fluid rounded detail-img-zoom" alt="{{ product.name }}" 
+                     style="max-height: 650px; width: 100%; object-fit: contain;" 
+                     data-bs-toggle="modal" data-bs-target="#imageZoomModal">
             {% else %}
                 <i class="bi bi-image text-secondary" style="font-size: 10rem;"></i>
             {% endif %}
         </div>
         
-        <!-- ИНФОРМАЦИЯ (Занимает оставшиеся 6 колонок) -->
+        <!-- ИНФОРМАЦИЯ О ТОВАРЕ -->
         <div class="col-md-6">
             <div class="card-body p-4 p-md-5">
                 
@@ -81,4 +105,23 @@
         </div>
     </div>
 </div>
+
+<!-- НОВЫЙ БЛОК: МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ОРИГИНАЛА ИЗОБРАЖЕНИЯ -->
+{% if product.image %}
+<div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <!-- Шапка модалки с крестиком закрытия (data-bs-theme="dark" делает крестик белым на темном фоне) -->
+            <div class="modal-header border-0 pb-0" data-bs-theme="dark">
+                <button type="button" class="btn-close fs-4 shadow-none" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <!-- Тело модалки с большой картинкой -->
+            <div class="modal-body text-center pt-0">
+                <img src="{{ product.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ product.name }}" style="max-height: 85vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
