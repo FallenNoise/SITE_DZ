@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     ProductListView, ProductDetailView,
-    ProductCreateView, ProductUpdateView, ProductDeleteView
+    ProductCreateView, ProductUpdateView, ProductDeleteView,
+    ToggleFavoriteView  # Импортируем новый класс
 )
 
 urlpatterns = [
@@ -14,4 +15,8 @@ urlpatterns = [
     path('product/<int:pk>/edit/', ProductUpdateView.as_view(), name='edit_product'),
     path('product/<int:pk>/delete/',
          ProductDeleteView.as_view(), name='delete_product'),
+
+    # НОВЫЙ МАРШРУТ: Кнопка "В избранное"
+    path('product/<int:pk>/favorite/',
+         ToggleFavoriteView.as_view(), name='toggle_favorite'),
 ]

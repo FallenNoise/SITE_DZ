@@ -63,9 +63,12 @@ class Product(models.Model):
     tags = models.ManyToManyField(
         Tag, related_name='products', blank=True, verbose_name="Теги")
 
-    # НОВОЕ ПОЛЕ: Связь с пользователями для учета просмотров
     viewed_by_users = models.ManyToManyField(
         User, related_name='viewed_products', blank=True, verbose_name="Просмотрели пользователи")
+
+    # НОВОЕ ПОЛЕ: Кто добавил товар в избранное
+    favorited_by = models.ManyToManyField(
+        User, related_name='favorite_products', blank=True, verbose_name="В избранном у")
 
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(

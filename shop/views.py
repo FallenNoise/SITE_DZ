@@ -1,31 +1,27 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from .models import Product, Tag
-
-# 1. Каталог с фильтрацией и ПАГИНАЦИЕЙ
 
 
 class ProductListView(ListView):
     model = Product
     template_name = 'shop/index.html'
     context_object_name = 'products'
-    paginate_by = 6  # Django сам разобьет товары по 6 штук на страницу
+    paginate_by = 6
 
     def get_queryset(self):
-        # Базовая выборка: только опубликованные, сортировка от новых к старым
         queryset = Product.objects.filter(
             status='published').order_by('-created_at')
-
-        # Проверяем, есть ли фильтрация по тегу
         tag_slug = self.kwargs.get('tag_slug')
         if tag_slug:
             self.tag = get_object_or_404(Tag, slug=tag_slug)
             queryset = queryset.filter(tags=self.tag)
         else:
             self.tag = None
-
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -34,8 +30,6 @@ class ProductListView(ListView):
         context['all_tags'] = Tag.objects.all()
         return context
 
-# 2. Карточка товара с ФИКСАЦИЕЙ ПРОСМОТРОВ
-
 
 class ProductDetailView(DetailView):
     model = Product
@@ -43,15 +37,10 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
 
     def get(self, request, *args, **kwargs):
-        # Сначала получаем объект товара
         response = super().get(request, *args, **kwargs)
-        # Если юзер авторизован, добавляем его в историю просмотров этого товара
         if request.user.is_authenticated:
-            # add() работает умно: если юзер уже есть в списке, он не продублируется
             self.object.viewed_by_users.add(request.user)
         return response
-
-# 3. Создание товара
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -64,8 +53,6 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-# 4. Редактирование товара (только для владельца)
-
 
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
@@ -76,8 +63,6 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user == self.get_object().owner
 
-# 5. Удаление товара (только для владельца)
-
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Product
@@ -86,3 +71,22 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user == self.get_object().owner
+
+
+# НОВЫЙ КЛАСС: Обработчик добавления/удаления из избранного
+class ToggleFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+
+        # Проверяем, есть ли уже этот пользователь в списке добавивших
+        if request.user in product.favorited_by.all():
+            product.favorited_by.remove(request.user)
+            messages.warning(
+                request, f'Товар "{product.name}" удален из избранного.')
+        else:
+            product.favorited_by.add(request.user)
+            messages.success(
+                request, f'Товар "{product.name}" добавлен в избранное!')
+
+        # Возвращаем пользователя на ту же страницу (каталог или карточку товара)
+        return redirect(request.META.get('HTTP_REFERER', 'index'))
