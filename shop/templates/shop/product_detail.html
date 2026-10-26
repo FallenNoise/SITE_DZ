@@ -5,55 +5,42 @@
 
 {% block extra_head %}
 <style>
-    /* Эффекты при наведении на главную картинку товара */
-    .detail-img-zoom {
-        cursor: zoom-in;
-        transition: transform 0.3s ease-in-out, filter 0.3s ease;
-    }
-    .detail-img-zoom:hover {
-        transform: scale(1.03);
-        filter: brightness(1.04);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    
-    .modal-backdrop.show {
-        opacity: 0.85 !important;
-    }
-
-    /* Анимация для плавающей кнопки "Назад" */
-    .floating-back-btn {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        z-index: 1050; /* Поверх всех элементов карточки */
-    }
-    .floating-back-btn:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
-    }
+    .detail-img-zoom { cursor: zoom-in; transition: transform 0.3s ease-in-out, filter 0.3s ease; }
+    .detail-img-zoom:hover { transform: scale(1.03); filter: brightness(1.04); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .modal-backdrop.show { opacity: 0.85 !important; }
+    .floating-back-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1050; }
+    .floating-back-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- ПЛАВАЮЩАЯ КНОПКА "В КАТАЛОГ" (Зафиксирована в левом нижнем углу экрана) -->
-<a href="{% url 'index' %}" 
-   class="btn btn-dark btn-lg rounded-pill shadow floating-back-btn position-fixed bottom-0 start-0 m-4 d-flex align-items-center" 
-   hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+<!-- БЛОК ВЫВОДА УВЕДОМЛЕНИЙ -->
+{% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                <strong>{% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% else %}<i class="bi bi-exclamation-circle-fill me-2"></i>{% endif %}</strong>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<a href="{% url 'index' %}" class="btn btn-dark btn-lg rounded-pill shadow floating-back-btn position-fixed bottom-0 start-0 m-4 d-flex align-items-center" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
     <i class="bi bi-arrow-left me-2 fs-5"></i> <span class="fw-bold">В каталог</span>
 </a>
 
 <div class="card shadow-sm border-0 mb-5 mt-4">
     <div class="row g-0">
-        <!-- ФОТОГРАФИЯ ТОВАРА -->
         <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4 overflow-hidden">
             {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid rounded detail-img-zoom" alt="{{ product.name }}" 
-                     style="max-height: 650px; width: 100%; object-fit: contain;" 
-                     data-bs-toggle="modal" data-bs-target="#imageZoomModal">
+                <img src="{{ product.image.url }}" class="img-fluid rounded detail-img-zoom" alt="{{ product.name }}" style="max-height: 650px; width: 100%; object-fit: contain;" data-bs-toggle="modal" data-bs-target="#imageZoomModal">
             {% else %}
                 <i class="bi bi-image text-secondary" style="font-size: 10rem;"></i>
             {% endif %}
         </div>
         
-        <!-- ИНФОРМАЦИЯ О ТОВАРЕ -->
         <div class="col-md-6">
             <div class="card-body p-4 p-md-5">
                 
@@ -67,15 +54,28 @@
                 </div>
 
                 <h1 class="card-title fw-bold mb-3 text-primary">{{ product.name }}</h1>
-                <h3 class="fw-bold mb-4" style="color: #cc5200;">{{ product.price }} руб.</h3>
+                
+                <!-- ЦЕНА И КНОПКА ИЗБРАННОГО -->
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <h3 class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</h3>
+                    
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'toggle_favorite' product.pk %}" method="post" class="m-0" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if user in product.favorited_by.all %}btn-danger{% else %}btn-outline-danger{% endif %} btn-sm rounded-pill shadow-sm fw-bold">
+                            {% if user in product.favorited_by.all %}
+                                <i class="bi bi-heart-fill me-1"></i> В избранном
+                            {% else %}
+                                <i class="bi bi-heart me-1"></i> В избранное
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
 
                 <div class="mb-4">
-                    {% if product.category %}
-                        <p class="mb-1"><strong>Категория:</strong> <span class="text-muted">{{ product.category.name }}</span></p>
-                    {% endif %}
-                    {% if product.manufacturer %}
-                        <p class="mb-1"><strong>Производитель:</strong> <span class="text-muted">{{ product.manufacturer.name }} ({{ product.manufacturer.country }})</span></p>
-                    {% endif %}
+                    {% if product.category %}<p class="mb-1"><strong>Категория:</strong> <span class="text-muted">{{ product.category.name }}</span></p>{% endif %}
+                    {% if product.manufacturer %}<p class="mb-1"><strong>Производитель:</strong> <span class="text-muted">{{ product.manufacturer.name }} ({{ product.manufacturer.country }})</span></p>{% endif %}
                     <p class="mb-1"><strong>Продавец:</strong> <span class="text-muted">{% if product.owner %}{{ product.owner.username }}{% else %}Магазин{% endif %}</span></p>
                     <p class="mb-1"><strong>Добавлено:</strong> <span class="text-muted">{{ product.created_at|date:"d M Y" }}</span></p>
                 </div>
@@ -89,9 +89,7 @@
                 <div class="mb-4">
                     <p class="mb-2 fw-bold text-secondary">Метки:</p>
                     {% for tag in product.tags.all %}
-                        <a href="{{ tag.get_absolute_url }}" class="badge bg-light text-secondary border border-warning text-decoration-none me-1 p-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
-                            #{{ tag.name }}
-                        </a>
+                        <a href="{{ tag.get_absolute_url }}" class="badge bg-light text-secondary border border-warning text-decoration-none me-1 p-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">#{{ tag.name }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -99,12 +97,8 @@
                 {% if user.is_authenticated and user == product.owner %}
                 <div class="mt-5 p-3 bg-light rounded border border-warning d-flex flex-wrap gap-2">
                     <span class="fw-bold w-100 mb-2 text-muted">Управление вашим товаром:</span>
-                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
-                        <i class="bi bi-pencil-square"></i> Редактировать
-                    </a>
-                    <a href="{% url 'delete_product' product.pk %}" class="btn btn-danger btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
-                        <i class="bi bi-trash"></i> Удалить
-                    </a>
+                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content"><i class="bi bi-pencil-square"></i> Редактировать</a>
+                    <a href="{% url 'delete_product' product.pk %}" class="btn btn-danger btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content"><i class="bi bi-trash"></i> Удалить</a>
                 </div>
                 {% endif %}
 
@@ -113,9 +107,8 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ОРИГИНАЛА ИЗОБРАЖЕНИЯ -->
 {% if product.image %}
-<div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
+<div class="modal fade" id="imageZoomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
             <div class="modal-header border-0 pb-0" data-bs-theme="dark">
@@ -128,5 +121,4 @@
     </div>
 </div>
 {% endif %}
-
 {% endblock %}

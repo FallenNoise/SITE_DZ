@@ -5,34 +5,33 @@
 
 {% block extra_head %}
 <style>
-    /* Плавное увеличение картинки при наведении */
-    .product-img-wrapper {
-        display: block;
-        overflow: hidden; /* Скрывает края картинки при увеличении */
-        border-top-left-radius: var(--bs-card-inner-border-radius);
-        border-top-right-radius: var(--bs-card-inner-border-radius);
-    }
-    .product-img-hover {
-        transition: transform 0.4s ease-in-out;
-    }
-    .product-img-wrapper:hover .product-img-hover {
-        transform: scale(1.08); /* Увеличение на 8% */
-    }
+    .product-img-wrapper { display: block; overflow: hidden; border-top-left-radius: var(--bs-card-inner-border-radius); border-top-right-radius: var(--bs-card-inner-border-radius); }
+    .product-img-hover { transition: transform 0.4s ease-in-out; }
+    .product-img-wrapper:hover .product-img-hover { transform: scale(1.08); }
     
-    /* Анимация заголовка-ссылки */
-    .product-title-link {
-        color: #0d6efd; /* Базовый синий цвет ссылок Bootstrap */
-        transition: color 0.2s ease-in-out;
-    }
-    .product-title-link:hover {
-        color: #cc5200; /* Ваш фирменный оранжевый */
-        text-decoration: underline !important;
-        text-decoration-color: rgba(204, 82, 0, 0.5) !important;
-    }
+    .product-title-link { color: #0d6efd; transition: color 0.2s ease-in-out; }
+    .product-title-link:hover { color: #cc5200; text-decoration: underline !important; text-decoration-color: rgba(204, 82, 0, 0.5) !important; }
+    
+    /* Анимация для сердечка */
+    .btn-favorite { transition: transform 0.2s; }
+    .btn-favorite:hover { transform: scale(1.2); }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- БЛОК ВЫВОДА УВЕДОМЛЕНИЙ (ALERTS) -->
+{% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                <strong>{% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% else %}<i class="bi bi-exclamation-circle-fill me-2"></i>{% endif %}</strong>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
     <h1 class="fw-bold" style="color: #cc5200;">Каталог товаров</h1>
     {% if user.is_authenticated %}
@@ -61,13 +60,10 @@
     </div>
 </div>
 
-<!-- СЕТКА КАРТОЧЕК -->
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for product in products %}
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
-                
-                <!-- АНИМИРОВАННАЯ КАРТИНКА-ССЫЛКА -->
                 <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" class="card-img-top product-img-hover" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
@@ -83,23 +79,12 @@
                         {% if product.category %}
                             <span class="badge bg-info mb-2">{{ product.category.name }}</span>
                         {% endif %}
-                        
-                        <!-- АНИМИРОВАННЫЙ ЗАГОЛОВОК-ССЫЛКА -->
                         <h5 class="card-title mb-3">
                             <a href="{{ product.get_absolute_url }}" class="product-title-link text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                                 {{ product.name }}
                             </a>
                         </h5>
-                        
                         <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
-                        
-                        <div class="mb-3">
-                            {% for tag in product.tags.all %}
-                                <span class="badge bg-light text-secondary border border-warning me-1" style="font-size: 0.75rem;">
-                                    {{ tag.name }}
-                                </span>
-                            {% endfor %}
-                        </div>
                     </div>
 
                     <div class="mt-auto">
@@ -109,9 +94,27 @@
                             <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                                 Подробнее
                             </a>
-                            <span class="text-muted small" title="Просмотры пользователей">
-                                <i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}
-                            </span>
+                            
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted small" title="Просмотры">
+                                    <i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}
+                                </span>
+                                
+                                <!-- КНОПКА "В ИЗБРАННОЕ" -->
+                                {% if user.is_authenticated %}
+                                <form action="{% url 'toggle_favorite' product.pk %}" method="post" class="m-0 p-0" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-favorite p-0 border-0 text-danger fs-5 bg-transparent" title="В избранное">
+                                        {% if user in product.favorited_by.all %}
+                                            <i class="bi bi-heart-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -124,34 +127,23 @@
     {% endfor %}
 </div>
 
-<!-- ПАГИНАЦИЯ -->
 {% if is_paginated %}
 <nav class="mt-5" aria-label="Навигация по страницам">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link text-warning" href="?page={{ page_obj.previous_page_number }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">&laquo; Назад</a>
-            </li>
+            <li class="page-item"><a class="page-link text-warning" href="?page={{ page_obj.previous_page_number }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">&laquo; Назад</a></li>
         {% else %}
             <li class="page-item disabled"><span class="page-link text-muted">&laquo; Назад</span></li>
         {% endif %}
-
         {% for num in page_obj.paginator.page_range %}
             {% if page_obj.number == num %}
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link bg-warning border-warning text-dark fw-bold">{{ num }}</span>
-                </li>
+                <li class="page-item active" aria-current="page"><span class="page-link bg-warning border-warning text-dark fw-bold">{{ num }}</span></li>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <li class="page-item">
-                    <a class="page-link text-dark" href="?page={{ num }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ num }}</a>
-                </li>
+                <li class="page-item"><a class="page-link text-dark" href="?page={{ num }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ num }}</a></li>
             {% endif %}
         {% endfor %}
-
         {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link text-warning" href="?page={{ page_obj.next_page_number }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">Вперед &raquo;</a>
-            </li>
+            <li class="page-item"><a class="page-link text-warning" href="?page={{ page_obj.next_page_number }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">Вперед &raquo;</a></li>
         {% else %}
             <li class="page-item disabled"><span class="page-link text-muted">Вперед &raquo;</span></li>
         {% endif %}
