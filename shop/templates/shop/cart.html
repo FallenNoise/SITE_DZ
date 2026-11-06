@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Корзина | Магазин Оранжевого настроения{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
+    <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-cart3 me-2"></i>Моя корзина</h1>
+</div>
+
+{% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if cart.items.all %}
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th scope="col" class="ps-4">Товар</th>
+                        <th scope="col">Цена</th>
+                        <th scope="col" class="text-center">Количество</th>
+                        <th scope="col">Сумма</th>
+                        <th scope="col" class="text-end pe-4">Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart.items.all %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" class="rounded shadow-sm me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded shadow-sm me-3 bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-image text-white"></i></div>
+                                {% endif %}
+                                <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ item.product.name }}</a>
+                            </div>
+                        </td>
+                        <td class="fw-bold">{{ item.product.price }} руб.</td>
+                        <td class="text-center">{{ item.quantity }} шт.</td>
+                        <td class="fw-bold" style="color: #cc5200;">{{ item.get_cost }} руб.</td>
+                        <td class="text-end pe-4">
+                            <form action="{% url 'remove_from_cart' item.pk %}" method="post" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Удалить"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white p-4 d-flex justify-content-between align-items-center">
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content"><i class="bi bi-arrow-left me-1"></i> Продолжить покупки</a>
+            <h4 class="fw-bold mb-0">Итого: <span style="color: #cc5200;">{{ total }} руб.</span></h4>
+            <button class="btn btn-warning btn-lg fw-bold shadow-sm">Оформить заказ</button>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5 bg-white rounded shadow-sm border mt-4">
+        <i class="bi bi-cart-x fs-1 text-muted mb-3 d-block"></i>
+        <h3 class="text-muted">Ваша корзина пуста</h3>
+        <a href="{% url 'index' %}" class="btn btn-warning mt-3 fw-bold shadow-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">Перейти к покупкам</a>
+    </div>
+{% endif %}
+{% endblock %}

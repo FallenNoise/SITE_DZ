@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет | Магазин Оранжевого настроения{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
+    <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-person-vcard me-2"></i>Личный кабинет</h1>
+    <span class="fs-5 text-muted">{{ user.username }}</span>
+</div>
+
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border" id="profileTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold" id="fav-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab">
+            <i class="bi bi-heart-fill text-danger me-1"></i> Избранное ({{ favorites.count }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold text-dark" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+            <i class="bi bi-clock-history me-1"></i> История просмотров ({{ history.count }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold text-dark" id="my-prod-tab" data-bs-toggle="tab" data-bs-target="#my-products" type="button" role="tab">
+            <i class="bi bi-shop me-1"></i> Мои товары ({{ my_products.count }})
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="profileTabsContent">
+    <div class="tab-pane fade show active" id="favorites" role="tabpanel">
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for product in favorites %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a></h6>
+                            <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-5">У вас пока нет избранных товаров.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="history" role="tabpanel">
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for product in history %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a></h6>
+                            <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-5">Вы еще не просматривали товары.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="my-products" role="tabpanel">
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for product in my_products %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a></h6>
+                            <p class="fw-bold mb-2" style="color: #cc5200;">{{ product.price }} руб.</p>
+                            <span class="badge {% if product.status == 'published' %}bg-success{% else %}bg-warning text-dark{% endif %} w-100">{{ product.get_status_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-5">Вы не выставили ни одного товара на продажу.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

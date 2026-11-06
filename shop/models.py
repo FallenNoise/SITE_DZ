@@ -86,8 +86,6 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('product_detail', args=[str(self.id)])
 
-# --- НОВАЯ МОДЕЛЬ ДЛЯ КОММЕНТАРИЕВ ---
-
 
 class Comment(models.Model):
     product = models.ForeignKey(
@@ -101,7 +99,33 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
-        ordering = ['-created_at']  # Новые комментарии будут сверху
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.author.username} к {self.product.name}"
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='cart', verbose_name="Покупатель")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items',
+                             on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, verbose_name="Товар")
+    quantity = models.PositiveIntegerField(
+        default=1, verbose_name="Количество")
+
+    class Meta:
+        verbose_name = "Товар в корзине"
+        verbose_name_plural = "Товары в корзине"
+
+    def get_cost(self):
+        return self.product.price * self.quantity

@@ -1,11 +1,11 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
-from django.db.models import Q  # Импорт для сложного поиска
-from .models import Product, Tag, Comment
+from django.db.models import Q
+from .models import Product, Tag, Comment, Cart, CartItem
 
 
 class ProductListView(ListView):
@@ -18,7 +18,6 @@ class ProductListView(ListView):
         queryset = Product.objects.filter(
             status='published').order_by('-created_at')
 
-        # ЛОГИКА ПОИСКА ПО ВСЕМ АТРИБУТАМ
         search_query = self.request.GET.get('q')
         if search_query:
             queryset = queryset.filter(
@@ -27,7 +26,6 @@ class ProductListView(ListView):
                 Q(category__name__icontains=search_query) |
                 Q(manufacturer__name__icontains=search_query) |
                 Q(tags__name__icontains=search_query)
-                # distinct() убирает дубликаты, если совпало несколько полей
             ).distinct()
 
         tag_slug = self.kwargs.get('tag_slug')
@@ -43,7 +41,6 @@ class ProductListView(ListView):
         context = super().get_context_data(**kwargs)
         context['current_tag'] = self.tag
         context['all_tags'] = Tag.objects.all()
-        # Передаем запрос в шаблон, чтобы подставить в строку поиска
         context['search_query'] = self.request.GET.get('q', '')
         return context
 
@@ -99,8 +96,6 @@ class ToggleFavoriteView(LoginRequiredMixin, View):
                 request, f'Товар "{product.name}" добавлен в избранное!')
         return redirect(request.META.get('HTTP_REFERER', 'index'))
 
-# НОВЫЙ КЛАСС: Добавление комментария
-
 
 class AddCommentView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -111,3 +106,48 @@ class AddCommentView(LoginRequiredMixin, View):
                 product=product, author=request.user, text=text)
             messages.success(request, 'Ваш комментарий успешно опубликован!')
         return redirect(product.get_absolute_url())
+
+
+class ProfileView(LoginRequiredMixin, View):
+    def get(self, request):
+        my_products = Product.objects.filter(
+            owner=request.user).order_by('-created_at')
+        favorites = request.user.favorite_products.all()
+        history = request.user.viewed_products.all()
+
+        return render(request, 'shop/profile.html', {
+            'my_products': my_products,
+            'favorites': favorites,
+            'history': history
+        })
+
+
+class CartView(LoginRequiredMixin, View):
+    def get(self, request):
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        total = sum(item.get_cost() for item in cart.items.all())
+        return render(request, 'shop/cart.html', {'cart': cart, 'total': total})
+
+
+class AddToCartView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, item_created = CartItem.objects.get_or_create(
+            cart=cart, product=product)
+
+        if not item_created:
+            cart_item.quantity += 1
+            cart_item.save()
+
+        messages.success(
+            request, f'Товар "{product.name}" добавлен в корзину!')
+        return redirect(request.META.get('HTTP_REFERER', 'index'))
+
+
+class RemoveFromCartView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        cart_item = get_object_or_404(CartItem, pk=pk, cart__user=request.user)
+        cart_item.delete()
+        messages.warning(request, 'Товар удален из корзины.')
+        return redirect('cart')
