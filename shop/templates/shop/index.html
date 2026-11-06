@@ -31,25 +31,20 @@
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
     <h1 class="fw-bold" style="color: #cc5200;">Каталог товаров</h1>
     {% if user.is_authenticated %}
-        <a href="{% url 'add_product' %}" class="btn btn-warning shadow-sm fw-bold" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+        <a href="{% url 'add_product' %}" class="btn btn-warning shadow-sm fw-bold" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
             <i class="bi bi-plus-circle"></i> Добавить товар
         </a>
     {% endif %}
 </div>
 
-<!-- ИСПРАВЛЕННАЯ СТРОКА ПОИСКА (Добавлен крестик и hx-push-url) -->
 <form action="{% url 'index' %}" method="get" class="mb-4" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
     <div class="input-group input-group-lg shadow-sm border border-warning rounded bg-white">
-        
         <input type="text" name="q" class="form-control border-0 bg-transparent" placeholder="Поиск по названию, описанию, бренду или тегу..." value="{{ search_query|default:'' }}">
-        
-        <!-- НОВЫЙ БЛОК: Кнопка сброса (крестик). Появляется только если есть активный поиск -->
         {% if search_query %}
             <a href="{% url 'index' %}" class="btn btn-outline-secondary border-0 d-flex align-items-center text-muted" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" title="Очистить поиск">
                 <i class="bi bi-x-lg"></i>
             </a>
         {% endif %}
-        
         <button class="btn btn-warning px-4 fw-bold" type="submit"><i class="bi bi-search"></i> Найти</button>
     </div>
 </form>
@@ -67,9 +62,10 @@
 
 <div class="row row-cols-1 row-cols-md-3 g-4 pb-5">
     {% for product in products %}
+        <!-- ИСПРАВЛЕНИЕ: Добавлен {{ request.path }} чтобы запрос всегда шел к каталогу -->
         <div class="col product-col" 
              {% if forloop.last and page_obj.has_next %}
-             hx-get="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+             hx-get="{{ request.path }}?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
              hx-trigger="revealed"
              hx-swap="afterend"
              hx-target="this"
@@ -77,7 +73,7 @@
              {% endif %}>
             
             <div class="card h-100 shadow-sm border-0">
-                <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+                <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" class="card-img-top product-img-hover" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
                     {% else %}
@@ -90,14 +86,14 @@
                     <div>
                         {% if product.category %}<span class="badge bg-info mb-2">{{ product.category.name }}</span>{% endif %}
                         <h5 class="card-title mb-3">
-                            <a href="{{ product.get_absolute_url }}" class="product-title-link text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a>
+                            <a href="{{ product.get_absolute_url }}" class="product-title-link text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">{{ product.name }}</a>
                         </h5>
                         <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
                     </div>
                     <div class="mt-auto">
                         <p class="card-text fw-bold mb-3 fs-5" style="color: #cc5200;">{{ product.price }} руб.</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">Подробнее</a>
+                            <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">Подробнее</a>
                             <div class="d-flex align-items-center gap-3">
                                 <span class="text-muted small" title="Просмотры"><i class="bi bi-eye"></i> {{ product.viewed_by_users.count }}</span>
                                 {% if user.is_authenticated %}

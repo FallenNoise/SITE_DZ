@@ -25,7 +25,8 @@
     </div>
 {% endif %}
 
-<a href="{% url 'index' %}" class="btn btn-dark btn-lg rounded-pill shadow floating-back-btn position-fixed bottom-0 start-0 m-4 d-flex align-items-center" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+<!-- ИСПРАВЛЕНИЕ: Добавлен hx-push-url="true" -->
+<a href="{% url 'index' %}" class="btn btn-dark btn-lg rounded-pill shadow floating-back-btn position-fixed bottom-0 start-0 m-4 d-flex align-items-center" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
     <i class="bi bi-arrow-left me-2 fs-5"></i> <span class="fw-bold">В каталог</span>
 </a>
 
@@ -62,7 +63,6 @@
                             </button>
                         </form>
                         
-                        <!-- НОВАЯ КНОПКА КОРЗИНЫ -->
                         <form action="{% url 'add_to_cart' product.pk %}" method="post" class="m-0" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-warning btn-sm rounded-pill shadow-sm fw-bold text-dark">
@@ -89,7 +89,7 @@
                 <div class="mb-4">
                     <p class="mb-2 fw-bold text-secondary">Метки:</p>
                     {% for tag in product.tags.all %}
-                        <a href="{{ tag.get_absolute_url }}" class="badge bg-light text-secondary border border-warning text-decoration-none me-1 p-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">#{{ tag.name }}</a>
+                        <a href="{{ tag.get_absolute_url }}" class="badge bg-light text-secondary border border-warning text-decoration-none me-1 p-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">#{{ tag.name }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -97,7 +97,7 @@
                 {% if user.is_authenticated and user == product.owner %}
                 <div class="mt-5 p-3 bg-light rounded border border-warning d-flex flex-wrap gap-2">
                     <span class="fw-bold w-100 mb-2 text-muted">Управление вашим товаром:</span>
-                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content"><i class="bi bi-pencil-square"></i> Редактировать</a>
+                    <a href="{% url 'edit_product' product.pk %}" class="btn btn-primary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true"><i class="bi bi-pencil-square"></i> Редактировать</a>
                     <a href="{% url 'delete_product' product.pk %}" class="btn btn-danger btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content"><i class="bi bi-trash"></i> Удалить</a>
                 </div>
                 {% endif %}
