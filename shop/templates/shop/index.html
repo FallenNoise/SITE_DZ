@@ -37,7 +37,7 @@
     {% endif %}
 </div>
 
-<!-- НОВЫЙ БЛОК: СТРОКА ПОИСКА -->
+<!-- СТРОКА ПОИСКА -->
 <form action="{% url 'index' %}" method="get" class="mb-4" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
     <div class="input-group input-group-lg shadow-sm border border-warning rounded">
         <input type="text" name="q" class="form-control border-0 bg-light" placeholder="Поиск по названию, описанию, бренду или тегу..." value="{{ search_query }}">
@@ -58,23 +58,32 @@
 
 <div class="row row-cols-1 row-cols-md-3 g-4 pb-5">
     {% for product in products %}
-        <!-- БЕСКОНЕЧНАЯ ПРОКРУТКА: Если это последний товар на странице и есть следующая страница -->
+        <!-- ИСПРАВЛЕНО: Добавлен hx-target="this", чтобы товары оставались внутри сетки -->
         <div class="col product-col" 
              {% if forloop.last and page_obj.has_next %}
              hx-get="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
              hx-trigger="revealed"
              hx-swap="afterend"
+             hx-target="this"
              hx-select=".product-col"
              {% endif %}>
             
             <div class="card h-100 shadow-sm border-0">
                 <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
-                    {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top product-img-hover" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">{% else %}<div class="card-img-top bg-light d-flex justify-content-center align-items-center text-muted product-img-hover" style="height: 250px;"><i class="bi bi-image fs-1"></i></div>{% endif %}
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top product-img-hover" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex justify-content-center align-items-center text-muted product-img-hover" style="height: 250px;">
+                            <i class="bi bi-image fs-1"></i>
+                        </div>
+                    {% endif %}
                 </a>
                 <div class="card-body d-flex flex-column">
                     <div>
                         {% if product.category %}<span class="badge bg-info mb-2">{{ product.category.name }}</span>{% endif %}
-                        <h5 class="card-title mb-3"><a href="{{ product.get_absolute_url }}" class="product-title-link text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a></h5>
+                        <h5 class="card-title mb-3">
+                            <a href="{{ product.get_absolute_url }}" class="product-title-link text-decoration-none" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">{{ product.name }}</a>
+                        </h5>
                         <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
                     </div>
                     <div class="mt-auto">
@@ -86,7 +95,13 @@
                                 {% if user.is_authenticated %}
                                 <form action="{% url 'toggle_favorite' product.pk %}" method="post" class="m-0 p-0" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-favorite p-0 border-0 text-danger fs-5 bg-transparent" title="В избранное">{% if user in product.favorited_by.all %}<i class="bi bi-heart-fill"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}</button>
+                                    <button type="submit" class="btn btn-favorite p-0 border-0 text-danger fs-5 bg-transparent" title="В избранное">
+                                        {% if user in product.favorited_by.all %}
+                                            <i class="bi bi-heart-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>
+                                        {% endif %}
+                                    </button>
                                 </form>
                                 {% endif %}
                             </div>
@@ -99,5 +114,4 @@
         <div class="col-12 text-center py-5"><h3 class="text-muted">По вашему запросу ничего не найдено.</h3></div>
     {% endfor %}
 </div>
-<!-- Блок пагинации полностью удален, так как работает бесконечная прокрутка -->
 {% endblock %}
