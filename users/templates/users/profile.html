@@ -72,9 +72,13 @@
                             </table>
                         </div>
                         <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
-                            <small class="text-muted"><strong>Адрес доставки:</strong> {{ order.address }} | <strong>Телефон:</strong> {{ order.phone }}</small>
-                            <h5 class="fw-bold mb-0" style="color: #cc5200;">Итого: {{ order.total_price }} руб.</h5>
-                        </div>
+                        <small class="text-muted">
+                            <strong>Адрес:</strong> {{ order.address }} | 
+                            <strong>Телефон:</strong> {{ order.phone }} | 
+                            <strong>Оплата:</strong> <span class="badge bg-secondary">{{ order.get_payment_method_display }}</span>
+                        </small>
+                        <h5 class="fw-bold mb-0" style="color: #cc5200;">Итого: {{ order.total_price }} руб.</h5>
+                    </div>
                     </div>
                 </div>
                 {% empty %}

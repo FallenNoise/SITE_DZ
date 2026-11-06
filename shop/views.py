@@ -195,11 +195,18 @@ class CheckoutView(LoginRequiredMixin, View):
         full_name = request.POST.get('full_name')
         phone = request.POST.get('phone')
         address = request.POST.get('address')
+        payment_method = request.POST.get(
+            'payment_method', 'cash')  # Получаем способ оплаты
         total = sum(item.get_cost() for item in cart.items.all())
 
-        # 1. Создаем заказ
+        # 1. Создаем заказ с учетом оплаты
         order = Order.objects.create(
-            user=request.user, full_name=full_name, phone=phone, address=address, total_price=total
+            user=request.user,
+            full_name=full_name,
+            phone=phone,
+            address=address,
+            payment_method=payment_method,
+            total_price=total
         )
 
         # 2. Переносим товары из корзины в детали заказа
@@ -213,5 +220,4 @@ class CheckoutView(LoginRequiredMixin, View):
 
         messages.success(
             request, f'Заказ #{order.pk} успешно оформлен! Мы свяжемся с вами в ближайшее время.')
-        # Редирект в профиль на вкладку истории
         return redirect('profile')

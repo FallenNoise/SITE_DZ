@@ -134,11 +134,18 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+    PAYMENT_CHOICES = [
+        ('cash', 'Наличными при получении'),
+        ('card', 'Банковской картой онлайн'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name='orders', verbose_name="Покупатель")
     full_name = models.CharField(max_length=150, verbose_name="ФИО получателя")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
     address = models.TextField(verbose_name="Адрес доставки")
+    payment_method = models.CharField(
+        max_length=20, choices=PAYMENT_CHOICES, default='cash', verbose_name="Способ оплаты")  # НОВОЕ ПОЛЕ
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
     created_at = models.DateTimeField(
