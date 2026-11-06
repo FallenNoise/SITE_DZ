@@ -5,17 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23cc5200%22/><text x=%2250%22 y=%2250%22 font-size=%2255%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>🎵</text></svg>">
+    <!-- Иконка сайта (Favicon) - Апельсинка 🍊 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='58' r='35' fill='%23FF8C00'/%3E%3Cpath d='M50 23c-5-8-15-6-15-6s8 10 15 6z' fill='%234CAF50'/%3E%3Crect x='48' y='10' width='5' height='15' rx='2' fill='%238B5A2B' transform='rotate(-15 50 20)'/%3E%3Ccircle cx='42' cy='50' r='2' fill='%23FFF' opacity='0.6'/%3E%3C/svg%3E">
+
+    <!-- Динамический заголовок для страниц -->
     <title>{% block title %}Магазин Оранжевого настроения{% endblock %}</title>
     
+    <!-- Подключаем CSS Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Подключаем векторные иконки Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
+    <!-- Подключаем HTMX и расширение для обновления <title> при переходах -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/head-support.js"></script>
     
+    <!-- Блок для дополнительных стилей на конкретных страницах -->
     {% block extra_head %}{% endblock %}
 
+    <!-- Стили с id для предотвращения конфликтов с HTMX -->
     <style id="custom-theme-styles">
         .brand-animated { transition: all 0.3s ease-in-out; }
         .brand-animated:hover { transform: scale(1.02); text-shadow: 0 0 12px rgba(255, 255, 255, 0.7); }
@@ -23,6 +32,7 @@
         .brand-emoji { display: inline-block; transition: transform 0.3s ease; }
         .brand-animated:hover .brand-emoji { transform: rotate(15deg) scale(1.1); }
         
+        /* Стили для кастомной кнопки плеера */
         .btn-orange-animated {
             background-color: transparent;
             color: #ff8c1a;
@@ -38,23 +48,30 @@
     </style>
 </head>
 
+<!-- Включаем расширение head-support для HTMX -->
 <body class="bg-light" hx-ext="head-support">
 
+    <!-- 1. ФИЗИЧЕСКИЙ ПЛЕЕР (Лежит вне зоны обновления HTMX, музыка не прерывается) -->
     <audio id="bg-music" loop>
         <source src="{% static 'audio/oranzhevoe_nastroenie.mp3' %}" type="audio/mpeg">
     </audio>
 
+    <!-- 2. ЗОНА БЕСШОВНОГО ОБНОВЛЕНИЯ HTMX -->
     <div id="htmx-content" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
         
+        <!-- Навигационная панель -->
         <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(to bottom, #ff8c1a, #cc5200); box-shadow: 0 4px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);">
             <div class="container">
+                <!-- Логотип -->
                 <a class="navbar-brand fw-bold d-flex align-items-center brand-animated" href="/">
                     <span class="fs-3 me-2 brand-emoji">🍊</span> 
                     Магазин Оранжевого настроения
                 </a>
                 
+                <!-- Правая часть меню: Кнопка плеера и профиль -->
                 <div class="d-flex align-items-center">
                     
+                    <!-- Визуальная часть плеера -->
                     <div class="me-4 d-none d-md-flex align-items-center bg-white px-3 py-1 shadow-sm" style="border-radius: 20px; border: 1px solid #ff8c1a;">
                         <span class="me-2 text-muted small fw-bold">🎵 Чайф</span>
                         <button id="custom-play-btn" class="btn btn-sm btn-orange-animated rounded-circle d-flex justify-content-center align-items-center" style="width: 28px; height: 28px; padding: 0;">
@@ -62,12 +79,13 @@
                         </button>
                     </div>
                     
+                    <!-- Блок авторизации -->
                     {% if user.is_authenticated %}
                         <span class="navbar-text text-white me-3">
                             Привет, <strong>{{ user.username }}</strong>!
                         </span>
                         
-                        <!-- ОБНОВЛЕННЫЕ КНОПКИ ВЕРХНЕГО МЕНЮ -->
+                        <!-- Кнопки верхнего меню -->
                         <a href="{% url 'cart' %}" class="btn btn-light btn-sm me-2 fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
                             <i class="bi bi-cart3"></i> Корзина
                         </a>
@@ -75,6 +93,7 @@
                             <i class="bi bi-person-circle"></i> Профиль
                         </a>
                         
+                        <!-- Выход -->
                         <form method="post" action="{% url 'logout' %}" class="d-inline" hx-boost="false">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
@@ -87,18 +106,20 @@
             </div>
         </nav>
 
+        <!-- Основной контейнер для контента страниц -->
         <main class="container mt-4">
             {% block content %}
             {% endblock %}
         </main>
 
+        <!-- Подвал сайта -->
         <footer class="mt-5 py-4 border-top" style="background-color: #f8f9fa;">
             <div class="container text-center text-muted">
                 <p class="mb-0 fs-6">&copy; 2026 Бойбородов Илья Олегович. Магазин Оранжевого настроения.</p>
             </div>
         </footer>
 
-    </div> 
+    </div> <!-- КОНЕЦ ЗОНЫ ОБНОВЛЕНИЯ HTMX -->
 
     <!-- ПЛАВАЮЩАЯ КНОПКА "НАВЕРХ" -->
     <button type="button" class="btn btn-warning rounded-circle shadow scroll-to-top-btn" id="btn-back-to-top" title="Вернуться наверх">
@@ -127,8 +148,10 @@
         });
     </script>
 
+    <!-- Подключаем JS Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Умный скрипт управления музыкой -->
     <script>
         const audio = document.getElementById("bg-music");
         audio.volume = 0.3;
@@ -163,6 +186,7 @@
             }
         }, { once: true });
     </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
