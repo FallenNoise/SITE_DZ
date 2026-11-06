@@ -3,12 +3,14 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
-    <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-person-vcard me-2"></i>Личный кабинет</h1>
-    <span class="fs-5 text-muted">{{ user.username }}</span>
+    <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-person-vcard me-2"></i>Личный кабинет: {{ user.username }}</h1>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
+        <i class="bi bi-arrow-left me-1"></i> В каталог
+    </a>
 </div>
 
+<!-- ВКЛАДКИ НАВИГАЦИИ -->
 <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border flex-column flex-md-row gap-2" id="profileTabs" role="tablist">
-    <!-- НОВАЯ ВКЛАДКА: ЗАКАЗЫ -->
     <li class="nav-item" role="presentation">
         <button class="nav-link active fw-bold w-100 text-md-center" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
             <i class="bi bi-box-seam me-1"></i> Мои заказы ({{ orders.count }})
@@ -31,8 +33,10 @@
     </li>
 </ul>
 
+<!-- СОДЕРЖИМОЕ ВКЛАДОК -->
 <div class="tab-content" id="profileTabsContent">
-    <!-- КОНТЕНТ ЗАКАЗОВ -->
+    
+    <!-- 1. ЗАКАЗЫ -->
     <div class="tab-pane fade show active" id="orders" role="tabpanel">
         {% if messages %}
             {% for message in messages %}
@@ -57,7 +61,7 @@
                                 {% for item in order.items.all %}
                                 <tr class="border-bottom">
                                     <td class="ps-4">
-                                        <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">{{ item.product.name }}</a>
+                                        <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ item.product.name }}</a>
                                     </td>
                                     <td class="text-muted text-center">{{ item.quantity }} шт.</td>
                                     <td class="text-end pe-4 fw-bold">{{ item.get_cost }} руб.</td>
@@ -67,7 +71,7 @@
                         </table>
                     </div>
                     <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
-                        <small class="text-muted"><strong>Доставка:</strong> {{ order.address }}</small>
+                        <small class="text-muted"><strong>Адрес доставки:</strong> {{ order.address }} | <strong>Телефон:</strong> {{ order.phone }}</small>
                         <h5 class="fw-bold mb-0" style="color: #cc5200;">Итого: {{ order.total_price }} руб.</h5>
                     </div>
                 </div>
@@ -78,7 +82,7 @@
         </div>
     </div>
 
-    <!-- ИЗБРАННОЕ -->
+    <!-- 2. ИЗБРАННОЕ -->
     <div class="tab-pane fade" id="favorites" role="tabpanel">
         <div class="row row-cols-1 row-cols-md-4 g-4">
             {% for product in favorites %}
@@ -99,7 +103,7 @@
         </div>
     </div>
 
-    <!-- ИСТОРИЯ ПРОСМОТРОВ -->
+    <!-- 3. ИСТОРИЯ ПРОСМОТРОВ -->
     <div class="tab-pane fade" id="history" role="tabpanel">
         <div class="row row-cols-1 row-cols-md-4 g-4">
             {% for product in history %}
@@ -120,7 +124,7 @@
         </div>
     </div>
 
-    <!-- МОИ ТОВАРЫ НА ПРОДАЖУ -->
+    <!-- 4. МОИ ТОВАРЫ НА ПРОДАЖУ -->
     <div class="tab-pane fade" id="my-products" role="tabpanel">
         <div class="row row-cols-1 row-cols-md-4 g-4">
             {% for product in my_products %}
@@ -141,5 +145,6 @@
             {% endfor %}
         </div>
     </div>
+
 </div>
 {% endblock %}
