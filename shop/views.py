@@ -5,7 +5,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db.models import Q
-from .models import Product, Tag, Comment, Cart, CartItem
+from .models import Product, Tag, Comment, Cart, CartItem, Order, OrderItem
 
 
 class ProductListView(ListView):
@@ -114,11 +114,14 @@ class ProfileView(LoginRequiredMixin, View):
             owner=request.user).order_by('-created_at')
         favorites = request.user.favorite_products.all()
         history = request.user.viewed_products.all()
+        # ДОБАВЛЕНО: История заказов
+        orders = Order.objects.filter(user=request.user)
 
         return render(request, 'shop/profile.html', {
             'my_products': my_products,
             'favorites': favorites,
-            'history': history
+            'history': history,
+            'orders': orders
         })
 
 
@@ -144,6 +147,25 @@ class AddToCartView(LoginRequiredMixin, View):
             request, f'Товар "{product.name}" добавлен в корзину!')
         return redirect(request.META.get('HTTP_REFERER', 'index'))
 
+# НОВОЕ: Обработка кнопок +/- в корзине
+
+
+class UpdateCartQuantityView(LoginRequiredMixin, View):
+    def post(self, request, pk, action):
+        cart_item = get_object_or_404(CartItem, pk=pk, cart__user=request.user)
+
+        if action == 'increase':
+            cart_item.quantity += 1
+            cart_item.save()
+        elif action == 'decrease':
+            if cart_item.quantity > 1:
+                cart_item.quantity -= 1
+                cart_item.save()
+            else:
+                cart_item.delete()
+
+        return redirect('cart')
+
 
 class RemoveFromCartView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -151,3 +173,45 @@ class RemoveFromCartView(LoginRequiredMixin, View):
         cart_item.delete()
         messages.warning(request, 'Товар удален из корзины.')
         return redirect('cart')
+
+# НОВОЕ: Оформление заказа (Checkout)
+
+
+class CheckoutView(LoginRequiredMixin, View):
+    def get(self, request):
+        cart = get_object_or_404(Cart, user=request.user)
+        if not cart.items.exists():
+            messages.warning(request, "Ваша корзина пуста.")
+            return redirect('index')
+
+        total = sum(item.get_cost() for item in cart.items.all())
+        return render(request, 'shop/checkout.html', {'cart': cart, 'total': total})
+
+    def post(self, request):
+        cart = get_object_or_404(Cart, user=request.user)
+        if not cart.items.exists():
+            return redirect('index')
+
+        full_name = request.POST.get('full_name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        total = sum(item.get_cost() for item in cart.items.all())
+
+        # 1. Создаем заказ
+        order = Order.objects.create(
+            user=request.user, full_name=full_name, phone=phone, address=address, total_price=total
+        )
+
+        # 2. Переносим товары из корзины в детали заказа
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order, product=item.product, price=item.product.price, quantity=item.quantity
+            )
+
+        # 3. Очищаем корзину
+        cart.items.all().delete()
+
+        messages.success(
+            request, f'Заказ #{order.pk} успешно оформлен! Мы свяжемся с вами в ближайшее время.')
+        # Редирект в профиль на вкладку истории
+        return redirect('profile')

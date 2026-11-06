@@ -129,3 +129,39 @@ class CartItem(models.Model):
 
     def get_cost(self):
         return self.product.price * self.quantity
+
+# --- НОВЫЕ МОДЕЛИ ДЛЯ ОФОРМЛЕНИЯ ЗАКАЗОВ ---
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='orders', verbose_name="Покупатель")
+    full_name = models.CharField(max_length=150, verbose_name="ФИО получателя")
+    phone = models.CharField(max_length=20, verbose_name="Телефон")
+    address = models.TextField(verbose_name="Адрес доставки")
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата оформления")
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заказ #{self.pk} от {self.user.username}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, verbose_name="Товар")
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, verbose_name="Цена при покупке")
+    quantity = models.PositiveIntegerField(
+        default=1, verbose_name="Количество")
+
+    def get_cost(self):
+        return self.price * self.quantity

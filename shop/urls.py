@@ -3,7 +3,8 @@ from .views import (
     ProductListView, ProductDetailView,
     ProductCreateView, ProductUpdateView, ProductDeleteView,
     ToggleFavoriteView, AddCommentView,
-    ProfileView, CartView, AddToCartView, RemoveFromCartView
+    ProfileView, CartView, AddToCartView, RemoveFromCartView,
+    UpdateCartQuantityView, CheckoutView  # Новые импорты
 )
 
 urlpatterns = [
@@ -23,8 +24,13 @@ urlpatterns = [
          AddCommentView.as_view(), name='add_comment'),
 
     path('profile/', ProfileView.as_view(), name='profile'),
+
+    # КОРЗИНА И ЗАКАЗЫ
     path('cart/', CartView.as_view(), name='cart'),
     path('cart/add/<int:pk>/', AddToCartView.as_view(), name='add_to_cart'),
     path('cart/remove/<int:pk>/', RemoveFromCartView.as_view(),
          name='remove_from_cart'),
+    path('cart/update/<int:pk>/<str:action>/',
+         UpdateCartQuantityView.as_view(), name='update_cart'),
+    path('checkout/', CheckoutView.as_view(), name='checkout'),
 ]
