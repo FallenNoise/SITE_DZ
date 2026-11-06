@@ -37,28 +37,36 @@
     {% endif %}
 </div>
 
-<!-- СТРОКА ПОИСКА -->
-<form action="{% url 'index' %}" method="get" class="mb-4" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
-    <div class="input-group input-group-lg shadow-sm border border-warning rounded">
-        <input type="text" name="q" class="form-control border-0 bg-light" placeholder="Поиск по названию, описанию, бренду или тегу..." value="{{ search_query }}">
+<!-- ИСПРАВЛЕННАЯ СТРОКА ПОИСКА (Добавлен крестик и hx-push-url) -->
+<form action="{% url 'index' %}" method="get" class="mb-4" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
+    <div class="input-group input-group-lg shadow-sm border border-warning rounded bg-white">
+        
+        <input type="text" name="q" class="form-control border-0 bg-transparent" placeholder="Поиск по названию, описанию, бренду или тегу..." value="{{ search_query|default:'' }}">
+        
+        <!-- НОВЫЙ БЛОК: Кнопка сброса (крестик). Появляется только если есть активный поиск -->
+        {% if search_query %}
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary border-0 d-flex align-items-center text-muted" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" title="Очистить поиск">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        {% endif %}
+        
         <button class="btn btn-warning px-4 fw-bold" type="submit"><i class="bi bi-search"></i> Найти</button>
     </div>
 </form>
 
 <div class="mb-4 bg-white p-3 rounded shadow-sm border">
     <h5 class="text-muted mb-3 fs-6">
-        {% if current_tag %}Метка: <span class="badge bg-warning text-dark ms-1">{{ current_tag.name }}</span><a href="{% url 'index' %}" class="btn btn-sm btn-outline-secondary ms-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">Сбросить</a>{% else %}Все метки{% endif %}
+        {% if current_tag %}Метка: <span class="badge bg-warning text-dark ms-1">{{ current_tag.name }}</span><a href="{% url 'index' %}" class="btn btn-sm btn-outline-secondary ms-2" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">Сбросить</a>{% else %}Все метки{% endif %}
     </h5>
     <div class="d-flex flex-wrap gap-2">
         {% for tag in all_tags %}
-            <a href="{{ tag.get_absolute_url }}" class="btn btn-sm {% if current_tag and current_tag.slug == tag.slug %}btn-warning fw-bold shadow-sm{% else %}btn-outline-warning text-dark{% endif %}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">#{{ tag.name }}</a>
+            <a href="{{ tag.get_absolute_url }}" class="btn btn-sm {% if current_tag and current_tag.slug == tag.slug %}btn-warning fw-bold shadow-sm{% else %}btn-outline-warning text-dark{% endif %}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">#{{ tag.name }}</a>
         {% endfor %}
     </div>
 </div>
 
 <div class="row row-cols-1 row-cols-md-3 g-4 pb-5">
     {% for product in products %}
-        <!-- ИСПРАВЛЕНО: Добавлен hx-target="this", чтобы товары оставались внутри сетки -->
         <div class="col product-col" 
              {% if forloop.last and page_obj.has_next %}
              hx-get="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
