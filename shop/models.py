@@ -65,8 +65,6 @@ class Product(models.Model):
 
     viewed_by_users = models.ManyToManyField(
         User, related_name='viewed_products', blank=True, verbose_name="Просмотрели пользователи")
-
-    # НОВОЕ ПОЛЕ: Кто добавил товар в избранное
     favorited_by = models.ManyToManyField(
         User, related_name='favorite_products', blank=True, verbose_name="В избранном у")
 
@@ -87,3 +85,23 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('product_detail', args=[str(self.id)])
+
+# --- НОВАЯ МОДЕЛЬ ДЛЯ КОММЕНТАРИЕВ ---
+
+
+class Comment(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='comments', verbose_name="Товар")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Автор")
+    text = models.TextField(verbose_name="Текст комментария")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата создания")
+
+    class Meta:
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
+        ordering = ['-created_at']  # Новые комментарии будут сверху
+
+    def __str__(self):
+        return f"{self.author.username} к {self.product.name}"

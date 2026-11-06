@@ -33,6 +33,7 @@
 
 <div class="card shadow-sm border-0 mb-5 mt-4">
     <div class="row g-0">
+        <!-- ФОТОГРАФИЯ -->
         <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4 overflow-hidden">
             {% if product.image %}
                 <img src="{{ product.image.url }}" class="img-fluid rounded detail-img-zoom" alt="{{ product.name }}" style="max-height: 650px; width: 100%; object-fit: contain;" data-bs-toggle="modal" data-bs-target="#imageZoomModal">
@@ -41,6 +42,7 @@
             {% endif %}
         </div>
         
+        <!-- ИНФОРМАЦИЯ О ТОВАРЕ -->
         <div class="col-md-6">
             <div class="card-body p-4 p-md-5">
                 
@@ -55,7 +57,6 @@
 
                 <h1 class="card-title fw-bold mb-3 text-primary">{{ product.name }}</h1>
                 
-                <!-- ЦЕНА И КНОПКА ИЗБРАННОГО -->
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <h3 class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</h3>
                     
@@ -107,6 +108,55 @@
     </div>
 </div>
 
+<!-- ================= НОВЫЙ БЛОК: КОММЕНТАРИИ К ТОВАРУ ================= -->
+<div class="card shadow-sm border-0 mt-5 mb-5">
+    <div class="card-body p-4 p-md-5">
+        <h3 class="fw-bold mb-4 border-bottom pb-3" style="color: #cc5200;">
+            <i class="bi bi-chat-dots me-2"></i> Комментарии ({{ product.comments.count }})
+        </h3>
+        
+        <!-- Форма добавления комментария -->
+        {% if user.is_authenticated %}
+        <form action="{% url 'add_comment' product.pk %}" method="post" class="mb-5 bg-light p-4 rounded border" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+                <textarea name="text" class="form-control border-warning" id="floatingTextarea" style="height: 100px" required placeholder="Написать комментарий..."></textarea>
+                <label for="floatingTextarea" class="text-muted">Оставьте ваш отзыв о товаре...</label>
+            </div>
+            <button type="submit" class="btn btn-warning fw-bold px-4 shadow-sm">
+                <i class="bi bi-send me-1"></i> Отправить
+            </button>
+        </form>
+        {% else %}
+        <div class="alert alert-secondary mb-5 shadow-sm border-0">
+            <i class="bi bi-lock-fill me-2"></i> Пожалуйста, <a href="#" class="alert-link text-warning">войдите в аккаунт</a>, чтобы оставлять комментарии.
+        </div>
+        {% endif %}
+
+        <!-- Список комментариев -->
+        <div class="d-flex flex-column gap-4">
+            {% for comment in product.comments.all %}
+            <div class="p-3 bg-white rounded shadow-sm border-start border-warning border-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+                    <strong class="text-primary fs-5">
+                        <i class="bi bi-person-circle text-secondary me-2"></i>{{ comment.author.username }}
+                    </strong>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ comment.created_at|date:"d M Y, H:i" }}</small>
+                </div>
+                <p class="mb-0 text-dark fs-6" style="line-height: 1.5;">{{ comment.text|linebreaksbr }}</p>
+            </div>
+            {% empty %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-chat-square-text fs-1 mb-2"></i>
+                <p class="mb-0 fs-5">Пока нет ни одного комментария. Будьте первым!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- ================= КОНЕЦ БЛОКА КОММЕНТАРИЕВ ================= -->
+
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ОРИГИНАЛА ИЗОБРАЖЕНИЯ (УВЕЛИЧЕНИЕ) -->
 {% if product.image %}
 <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Category, Manufacturer, Product, Tag
+from .models import Comment
 
 
 @admin.register(Category)
@@ -27,3 +28,9 @@ class ProductAdmin(admin.ModelAdmin):
 
     # Красивый виджет "двойной список" для выбора тегов
     filter_horizontal = ('tags',)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('author', 'product', 'created_at')
+    list_filter = ('created_at',)
