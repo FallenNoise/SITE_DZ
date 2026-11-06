@@ -2,149 +2,151 @@
 {% block title %}Личный кабинет | Магазин Оранжевого настроения{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 mt-4">
-    <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-person-vcard me-2"></i>Личный кабинет: {{ user.username }}</h1>
-    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true">
-        <i class="bi bi-arrow-left me-1"></i> В каталог
-    </a>
-</div>
+<div class="container py-4" id="profile-container">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <h1 class="fw-bold" style="color: #cc5200;"><i class="bi bi-person-vcard me-2"></i>Личный кабинет: {{ user.username }}</h1>
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
+            <i class="bi bi-arrow-left me-1"></i> В каталог
+        </a>
+    </div>
 
-<!-- ВКЛАДКИ НАВИГАЦИИ -->
-<ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border flex-column flex-md-row gap-2" id="profileTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-bold w-100 text-md-center" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab">
-            <i class="bi bi-box-seam me-1"></i> Мои заказы ({{ orders.count }})
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold text-dark w-100 text-md-center" id="fav-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab">
-            <i class="bi bi-heart-fill text-danger me-1"></i> Избранное ({{ favorites.count }})
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold text-dark w-100 text-md-center" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
-            <i class="bi bi-clock-history me-1"></i> История ({{ history.count }})
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold text-dark w-100 text-md-center" id="my-prod-tab" data-bs-toggle="tab" data-bs-target="#my-products" type="button" role="tab">
-            <i class="bi bi-shop me-1"></i> Мои товары ({{ my_products.count }})
-        </button>
-    </li>
-</ul>
+    <!-- ВКЛАДКИ НАВИГАЦИИ -->
+    <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border flex-column flex-md-row gap-2" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold w-100 text-md-center" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
+                <i class="bi bi-box-seam me-1"></i> Мои заказы ({{ orders.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark w-100 text-md-center" id="fav-tab" data-bs-toggle="tab" data-bs-target="#favorites-pane" type="button" role="tab">
+                <i class="bi bi-heart-fill text-danger me-1"></i> Избранное ({{ favorites.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark w-100 text-md-center" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-pane" type="button" role="tab">
+                <i class="bi bi-clock-history me-1"></i> История ({{ history.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark w-100 text-md-center" id="my-prod-tab" data-bs-toggle="tab" data-bs-target="#my-products-pane" type="button" role="tab">
+                <i class="bi bi-shop me-1"></i> Мои товары ({{ my_products.count }})
+            </button>
+        </li>
+    </ul>
 
-<!-- СОДЕРЖИМОЕ ВКЛАДОК -->
-<div class="tab-content" id="profileTabsContent">
-    
-    <!-- 1. ЗАКАЗЫ -->
-    <div class="tab-pane fade show active" id="orders" role="tabpanel">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    <!-- СОДЕРЖИМОЕ ВКЛАДОК -->
+    <div class="tab-content" id="profileTabsContent">
         
-        <div class="row g-4">
-            {% for order in orders %}
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center p-3 border-bottom-0">
-                        <span class="fw-bold fs-5">Заказ #{{ order.pk }}</span>
-                        <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> {{ order.created_at|date:"d M Y, H:i" }}</span>
+        <!-- 1. ЗАКАЗЫ -->
+        <div class="tab-pane fade show active" id="orders-pane" role="tabpanel">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
                     </div>
-                    <div class="card-body p-0">
-                        <table class="table table-borderless table-hover mb-0">
-                            <tbody>
-                                {% for item in order.items.all %}
-                                <tr class="border-bottom">
-                                    <td class="ps-4">
-                                        <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ item.product.name }}</a>
-                                    </td>
-                                    <td class="text-muted text-center">{{ item.quantity }} шт.</td>
-                                    <td class="text-end pe-4 fw-bold">{{ item.get_cost }} руб.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
-                        <small class="text-muted"><strong>Адрес доставки:</strong> {{ order.address }} | <strong>Телефон:</strong> {{ order.phone }}</small>
-                        <h5 class="fw-bold mb-0" style="color: #cc5200;">Итого: {{ order.total_price }} руб.</h5>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="row g-4">
+                {% for order in orders %}
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center p-3 border-bottom-0">
+                            <span class="fw-bold fs-5">Заказ #{{ order.pk }}</span>
+                            <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> {{ order.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-borderless table-hover mb-0">
+                                <tbody>
+                                    {% for item in order.items.all %}
+                                    <tr class="border-bottom">
+                                        <td class="ps-4">
+                                            <a href="{{ item.product.get_absolute_url }}" class="text-decoration-none fw-bold text-dark" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ item.product.name }}</a>
+                                        </td>
+                                        <td class="text-muted text-center">{{ item.quantity }} шт.</td>
+                                        <td class="text-end pe-4 fw-bold">{{ item.get_cost }} руб.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
+                            <small class="text-muted"><strong>Адрес доставки:</strong> {{ order.address }} | <strong>Телефон:</strong> {{ order.phone }}</small>
+                            <h5 class="fw-bold mb-0" style="color: #cc5200;">Итого: {{ order.total_price }} руб.</h5>
+                        </div>
                     </div>
                 </div>
+                {% empty %}
+                    <div class="col-12 text-center text-muted py-5 border rounded bg-white shadow-sm">Вы еще не оформляли заказов.</div>
+                {% endfor %}
             </div>
-            {% empty %}
-                <div class="col-12 text-center text-muted py-5 border rounded bg-white shadow-sm">Вы еще не оформляли заказов.</div>
-            {% endfor %}
         </div>
-    </div>
 
-    <!-- 2. ИЗБРАННОЕ -->
-    <div class="tab-pane fade" id="favorites" role="tabpanel">
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-            {% for product in favorites %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
-                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
-                        </a>
-                        <div class="card-body">
-                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
-                            <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+        <!-- 2. ИЗБРАННОЕ -->
+        <div class="tab-pane fade" id="favorites-pane" role="tabpanel">
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for product in favorites %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
+                                {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                            </a>
+                            <div class="card-body">
+                                <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
+                                <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <div class="col-12 text-center text-muted py-5">У вас пока нет избранных товаров.</div>
-            {% endfor %}
+                {% empty %}
+                    <div class="col-12 text-center text-muted py-5">У вас пока нет избранных товаров.</div>
+                {% endfor %}
+            </div>
         </div>
-    </div>
 
-    <!-- 3. ИСТОРИЯ ПРОСМОТРОВ -->
-    <div class="tab-pane fade" id="history" role="tabpanel">
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-            {% for product in history %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
-                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
-                        </a>
-                        <div class="card-body">
-                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
-                            <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+        <!-- 3. ИСТОРИЯ ПРОСМОТРОВ -->
+        <div class="tab-pane fade" id="history-pane" role="tabpanel">
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for product in history %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
+                                {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                            </a>
+                            <div class="card-body">
+                                <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
+                                <p class="fw-bold mb-0" style="color: #cc5200;">{{ product.price }} руб.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <div class="col-12 text-center text-muted py-5">Вы еще не просматривали товары.</div>
-            {% endfor %}
+                {% empty %}
+                    <div class="col-12 text-center text-muted py-5">Вы еще не просматривали товары.</div>
+                {% endfor %}
+            </div>
         </div>
-    </div>
 
-    <!-- 4. МОИ ТОВАРЫ НА ПРОДАЖУ -->
-    <div class="tab-pane fade" id="my-products" role="tabpanel">
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-            {% for product in my_products %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <a href="{{ product.get_absolute_url }}" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
-                            {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
-                        </a>
-                        <div class="card-body">
-                            <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
-                            <p class="fw-bold mb-2" style="color: #cc5200;">{{ product.price }} руб.</p>
-                            <span class="badge {% if product.status == 'published' %}bg-success{% else %}bg-warning text-dark{% endif %} w-100">{{ product.get_status_display }}</span>
+        <!-- 4. МОИ ТОВАРЫ НА ПРОДАЖУ -->
+        <div class="tab-pane fade" id="my-products-pane" role="tabpanel">
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                {% for product in my_products %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <a href="{{ product.get_absolute_url }}" class="product-img-wrapper" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">
+                                {% if product.image %}<img src="{{ product.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">{% else %}<div class="card-img-top bg-light text-center py-5"><i class="bi bi-image fs-1 text-muted"></i></div>{% endif %}
+                            </a>
+                            <div class="card-body">
+                                <h6 class="card-title"><a href="{{ product.get_absolute_url }}" class="text-decoration-none text-primary" hx-boost="true" hx-target="#htmx-content" hx-select="#htmx-content" hx-push-url="true" hx-swap="innerHTML">{{ product.name }}</a></h6>
+                                <p class="fw-bold mb-2" style="color: #cc5200;">{{ product.price }} руб.</p>
+                                <span class="badge {% if product.status == 'published' %}bg-success{% else %}bg-warning text-dark{% else %}bg-secondary{% endif %} w-100">{{ product.get_status_display }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <div class="col-12 text-center text-muted py-5">Вы не выставили ни одного товара на продажу.</div>
-            {% endfor %}
+                {% empty %}
+                    <div class="col-12 text-center text-muted py-5">Вы не выставили ни одного товара на продажу.</div>
+                {% endfor %}
+            </div>
         </div>
-    </div>
 
+    </div>
 </div>
 {% endblock %}

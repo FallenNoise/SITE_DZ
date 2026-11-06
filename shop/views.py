@@ -114,8 +114,8 @@ class ProfileView(LoginRequiredMixin, View):
             owner=request.user).order_by('-created_at')
         favorites = request.user.favorite_products.all()
         history = request.user.viewed_products.all()
-        # ДОБАВЛЕНО: История заказов
-        orders = Order.objects.filter(user=request.user)
+        orders = Order.objects.filter(
+            user=request.user).order_by('-created_at')
 
         return render(request, 'shop/profile.html', {
             'my_products': my_products,
